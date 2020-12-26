@@ -12,3 +12,9 @@ import Root from './Root.client';
 const initialCache = new Map();
 const root = unstable_createRoot(document.getElementById('root'));
 root.render(<Root initialCache={initialCache} />);
+
+// Reference server entrypoints so we know what client bundles to produce
+// TODO: Webpack plugin should do this.
+// TODO: how should this be done?
+// () => import('./App.server.js');
+import.meta.reactServer('./App.server.js');

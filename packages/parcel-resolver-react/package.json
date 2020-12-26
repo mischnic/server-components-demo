@@ -1,0 +1,11 @@
+{
+  "name": "parcel-resolver-react",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "parcel": ">= 2.0.0-beta.1"
+  },
+  "dependencies": {
+    "@parcel/plugin": "nightly"
+  }
+}

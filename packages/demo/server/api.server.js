@@ -8,13 +8,22 @@
 
 'use strict';
 
+const DIST_FOLDER = 'dist';
+
 const register = require('react-server-dom-webpack/node-register');
 register();
 const babelRegister = require('@babel/register');
 
 babelRegister({
-  ignore: [/\/(build|server|node_modules)\//],
-  presets: [['react-app', {runtime: 'automatic'}]],
+  ignore: [/\/(build|dist|server|node_modules)\//],
+  presets: [
+    [
+      '@babel/preset-react',
+      {
+        runtime: 'automatic',
+      },
+    ],
+  ],
   plugins: ['@babel/transform-modules-commonjs'],
 });
 
@@ -59,7 +68,7 @@ app.get(
   handleErrors(async function(_req, res) {
     await waitForWebpack();
     const html = readFileSync(
-      path.resolve(__dirname, '../build/index.html'),
+      path.resolve(__dirname, '../' + DIST_FOLDER + '/index.html'),
       'utf8'
     );
     // Note: this is sending an empty HTML shell, like a client-side-only app.
@@ -72,7 +81,10 @@ app.get(
 async function renderReactTree(res, props) {
   await waitForWebpack();
   const manifest = readFileSync(
-    path.resolve(__dirname, '../build/react-client-manifest.json'),
+    path.resolve(
+      __dirname,
+      '../' + DIST_FOLDER + '/react-client-manifest.json'
+    ),
     'utf8'
   );
   const moduleMap = JSON.parse(manifest);
@@ -157,7 +169,7 @@ app.get('/sleep/:ms', function(req, res) {
   }, req.params.ms);
 });
 
-app.use(express.static('build'));
+app.use(express.static(DIST_FOLDER));
 app.use(express.static('public'));
 
 app.on('error', function(error) {

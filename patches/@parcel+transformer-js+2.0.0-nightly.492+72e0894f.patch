@@ -1,0 +1,114 @@
+diff --git a/node_modules/@parcel/transformer-js/lib/visitors/modules.js b/node_modules/@parcel/transformer-js/lib/visitors/modules.js
+index 853fcb2..4561acd 100644
+--- a/node_modules/@parcel/transformer-js/lib/visitors/modules.js
++++ b/node_modules/@parcel/transformer-js/lib/visitors/modules.js
+@@ -55,6 +55,16 @@ function _path() {
+   return data;
+ }
+ 
++function _nullthrows() {
++  const data = _interopRequireDefault(require("nullthrows"));
++
++  _nullthrows = function () {
++    return data;
++  };
++
++  return data;
++}
++
+ function _utils() {
+   const data = require("@parcel/utils");
+ 
+@@ -97,6 +107,8 @@ let modulesVisitor = {
+         return getNamespace(state, binding.source);
+       } else if ((0, t().isImportDefaultSpecifier)(specifier)) {
+         return getDefault(state, binding.source);
++      } else {
++        (0, _assert().default)(false);
+       }
+     };
+   },
+@@ -197,7 +209,10 @@ let modulesVisitor = {
+ 
+   ExportDefaultDeclaration: {
+     exit(node, state) {
+-      // This has to happen AFTER any referenced identifiers are replaced.
++      var _state$asset;
++
++      (_state$asset = state.asset) === null || _state$asset === void 0 ? void 0 : _state$asset.symbols.set('default', 'default'); // This has to happen AFTER any referenced identifiers are replaced.
++
+       return () => {
+         let {
+           declaration
+@@ -292,9 +307,70 @@ function esm2cjs(ast, asset) {
+     importNames,
+     exports,
+     needsInteropFlag: false,
+-    scope
++    scope,
++    asset
+   };
++  asset === null || asset === void 0 ? void 0 : asset.symbols.ensure();
+   (0, _babylonWalk().traverse2)(ast, visitor, state);
++
++  if (asset) {
++    for (let node of imports) {
++      let source = (0, _nullthrows().default)(node.source).value;
++      let dep = asset.getDependencies().find(dep => dep.moduleSpecifier === source);
++
++      if (dep) {
++        dep.symbols.ensure();
++
++        if ((0, t().isImportDeclaration)(node)) {
++          for (let specifier of node.specifiers) {
++            let symbol;
++
++            if ((0, t().isImportSpecifier)(specifier)) {
++              symbol = specifier.local.name;
++            } else if ((0, t().isImportNamespaceSpecifier)(specifier)) {
++              symbol = '*';
++            } else if ((0, t().isImportDefaultSpecifier)(specifier)) {
++              symbol = 'default';
++            } else {
++              (0, _assert().default)(false);
++            }
++
++            dep.symbols.set(symbol, dep.id + ':' + symbol);
++          }
++        } else if ((0, t().isExportAllDeclaration)(node)) {
++          dep.symbols.set('*', '*', null, true);
++        } else if ((0, t().isExportNamedDeclaration)(node)) {
++          for (let specifier of node.specifiers) {
++            let exported, local;
++
++            if ((0, t().isExportSpecifier)(specifier)) {
++              exported = specifier.exported.name;
++              local = specifier.local.name;
++            } else if ((0, t().isExportDefaultSpecifier)(specifier)) {
++              local = 'default';
++              exported = 'default';
++            } else if ((0, t().isExportNamespaceSpecifier)(specifier)) {
++              local = '*';
++              exported = specifier.exported.name;
++            } else {
++              (0, _assert().default)(false);
++            }
++
++            dep.symbols.set(local, dep.id + ':' + exported, null, true);
++            asset.symbols.set(exported, dep.id + ':' + exported);
++          }
++        }
++      }
++    }
++
++    for (let node of exports) {
++      // register all local exports that aren't handled already
++      if (!asset.symbols.hasExportSymbol(node.exported.name)) {
++        asset.symbols.set(node.exported.name, node.exported.name);
++      }
++    }
++  }
++
+   let body = ast.program.body;
+   let prepend = [];
+   let helpersId;

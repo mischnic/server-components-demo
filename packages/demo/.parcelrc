@@ -1,0 +1,8 @@
+{
+  "extends": "@parcel/config-default",
+  "bundler": "parcel-bundler-react",
+  "transformers": {
+    "*.js": ["...", "parcel-transformer-react"]
+  },
+  "reporters": ["...", "parcel-reporter-react-manifest"]
+}

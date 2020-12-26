@@ -1,0 +1,12 @@
+diff --git a/node_modules/@parcel/types/index.js b/node_modules/@parcel/types/index.js
+index 84c6ad4..dfdfa72 100644
+--- a/node_modules/@parcel/types/index.js
++++ b/node_modules/@parcel/types/index.js
+@@ -951,6 +951,7 @@ export interface MutableBundleGraph extends BundleGraph<Bundle> {
+     Bundle,
+     shouldSkipDependency?: (Dependency) => boolean,
+   ): void;
++  reparentDependency(Dependency, Asset): void;
+   addEntryToBundle(
+     Asset,
+     Bundle,
