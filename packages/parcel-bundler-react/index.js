@@ -136,12 +136,6 @@ module.exports = (new Bundler({
             isClientAsset(resolution)
           ) {
             invariant(rootClientAsset);
-            console.log(
-              'reparent',
-              dependency,
-              dependency.id,
-              rootClientAsset.filePath
-            );
             // move this dependency to the root client asset
             bundleGraph.reparentDependency(dependency, rootClientAsset);
             // $FlowFixMe

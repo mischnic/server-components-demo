@@ -7,17 +7,17 @@ const {traverse2, REMOVE} = require('@parcel/babylon-walk');
 const invariant = require('assert');
 const t = require('@babel/types');
 
-function isServerAsset(asset /*: ?Asset*/) {
+function isServerAsset(asset) {
   return Boolean(
     asset && asset.type === 'js' && /\.server\.\w+/.test(asset.filePath)
   );
 }
-function isClientAsset(asset /*: ?Asset*/) {
+function isClientAsset(asset) {
   return Boolean(
     asset && asset.type === 'js' && /\.client\.\w+/.test(asset.filePath)
   );
 }
-function isNonClientAsset(asset /*: ?Asset*/) {
+function isNonClientAsset(asset) {
   return Boolean(
     asset && asset.type === 'js' && !/\.client\.\w+/.test(asset.filePath)
   );
